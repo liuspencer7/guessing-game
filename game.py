@@ -22,14 +22,12 @@ def choose_difficulty():
         print("Please enter 1, 2, or 3.")
 
 
-def play_game():
-    max_attempts = choose_difficulty()
-    number = random.randint(1, 100)
-
+def play_game(max_attempts, secret):
     print(f"\nI've picked a number between 1 and 100. You have {max_attempts} attempts.")
 
-    for attempt in range(1, max_attempts + 1):
-        remaining = max_attempts - attempt + 1
+    attempt = 0
+    while attempt < max_attempts:
+        attempt += 1
         try:
             guess = int(input(f"Attempt {attempt}/{max_attempts}: "))
         except ValueError:
@@ -37,24 +35,27 @@ def play_game():
             attempt -= 1
             continue
 
-        if guess < number:
+        if guess < secret:
             print("Too low!", end="")
-        elif guess > number:
+        elif guess > secret:
             print("Too high!", end="")
         else:
             print(f"Correct! You got it in {attempt} guess{'es' if attempt != 1 else ''}.")
             return
 
-        if attempt < max_attempts:
-            print(f" {remaining - 1} attempt{'s' if remaining - 1 != 1 else ''} remaining.")
+        remaining = max_attempts - attempt
+        if remaining > 0:
+            print(f" {remaining} attempt{'s' if remaining != 1 else ''} remaining.")
         else:
-            print(f"\nOut of attempts! The number was {number}.")
+            print(f"\nOut of attempts! The number was {secret}.")
 
 
 def main():
     print("=== Number Guessing Game ===")
     while True:
-        play_game()
+        max_attempts = choose_difficulty()
+        secret = random.randint(1, 100)
+        play_game(max_attempts, secret)
         again = input("\nPlay again? (y/n): ").strip().lower()
         if again != "y":
             print("Thanks for playing!")
