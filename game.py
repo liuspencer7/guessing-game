@@ -3,6 +3,11 @@ import os
 import random
 from datetime import datetime
 
+from rich import print
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+
 
 DIFFICULTIES = {
     "1": ("Easy", 10),
@@ -12,7 +17,7 @@ DIFFICULTIES = {
 
 
 def choose_difficulty():
-    print("\nSelect difficulty:")
+    print("\n[#ffffcc]Select difficulty:[/#ffffcc]")
     print("  1. Easy   (10 attempts)")
     print("  2. Medium  (7 attempts)")
     print("  3. Hard    (5 attempts)")
@@ -32,25 +37,26 @@ def play_game(max_attempts, secret):
     while attempt < max_attempts:
         attempt += 1
         try:
-            guess = int(input(f"Attempt {attempt}/{max_attempts}: "))
+            print(f"[#ffffcc]Attempt {attempt}/{max_attempts}:[/#ffffcc] ", end="")
+            guess = int(input())
         except ValueError:
             print("Please enter a valid number.")
             attempt -= 1
             continue
 
         if guess < secret:
-            print("Too low!", end="")
+            print("[#87ceeb]Too low![/#87ceeb]", end="")
         elif guess > secret:
-            print("Too high!", end="")
+            print("[#ff6b6b]Too high![/#ff6b6b]", end="")
         else:
-            print(f"Correct! You got it in {attempt} guess{'es' if attempt != 1 else ''}.")
+            print(f"[green]Correct! You got it in {attempt} guess{'es' if attempt != 1 else ''}.[/green]")
             return True, attempt
 
         remaining = max_attempts - attempt
         if remaining > 0:
-            print(f" {remaining} attempt{'s' if remaining != 1 else ''} remaining.")
+            print(f" [white]{remaining}[/white] attempt{'s' if remaining != 1 else ''} remaining.")
         else:
-            print(f"\nOut of attempts! The number was {secret}.")
+            print(f"\n[bold red]Out of attempts! The number was {secret}.[/bold red]")
 
     return False, max_attempts
 
@@ -79,8 +85,11 @@ def display_stats(stats):
     win_rate = round(len(wins) / total * 100)
     avg_guesses = round(sum(s["guesses_used"] for s in wins) / len(wins), 1) if wins else 0
 
-    print("\n=== All-Time Stats ===")
-    print(f"Total games: {total}  |  Win rate: {win_rate}%  |  Avg guesses on wins: {avg_guesses}")
+    table = Table(title="All-Time Stats")
+    table.add_column("Difficulty")
+    table.add_column("Games", justify="right")
+    table.add_column("Win Rate", justify="right")
+    table.add_column("Avg Guesses on Wins", justify="right")
 
     for name, _ in DIFFICULTIES.values():
         games = [s for s in stats if s["difficulty"] == name]
@@ -89,7 +98,12 @@ def display_stats(stats):
         diff_wins = [s for s in games if s["won"]]
         diff_win_rate = round(len(diff_wins) / len(games) * 100)
         diff_avg = round(sum(s["guesses_used"] for s in diff_wins) / len(diff_wins), 1) if diff_wins else 0
-        print(f"  {name:<8} — {len(games)} game{'s' if len(games) != 1 else ''}, {diff_win_rate}% wins, avg {diff_avg} guesses on wins")
+        table.add_row(name, str(len(games)), f"{diff_win_rate}%", str(diff_avg))
+
+    table.add_section()
+    table.add_row("Total", str(total), f"{win_rate}%", str(avg_guesses), style="bold")
+
+    Console().print(table)
     print()
 
 
@@ -100,11 +114,11 @@ def display_stats_brief(stats):
     wins = [s for s in stats if s["won"]]
     win_rate = round(len(wins) / total * 100)
     avg_guesses = round(sum(s["guesses_used"] for s in wins) / len(wins), 1) if wins else 0
-    print(f"\n{total} game{'s' if total != 1 else ''} played  —  {win_rate}% wins  —  avg {avg_guesses} guesses on wins")
+    print(f"\n[dim]{total} game{'s' if total != 1 else ''} played  —  {win_rate}% wins  —  avg {avg_guesses} guesses on wins[/dim]")
 
 
 def main():
-    print("=== Number Guessing Game ===")
+    Console().print(Panel("[bold cyan]Number Guessing Game[/bold cyan]", expand=False))
     display_stats(load_stats())
     while True:
         difficulty, max_attempts = choose_difficulty()
@@ -116,7 +130,8 @@ def main():
             "guesses_used": guesses_used,
             "won": won,
         })
-        again = input("\nPlay again? (y/n): ").strip().lower()
+        print("\n[#ffffcc]Play again? (y/n):[/#ffffcc] ", end="")
+        again = input().strip().lower()
         if again != "y":
             display_stats(load_stats())
             print("Thanks for playing!")
