@@ -1,6 +1,6 @@
 # Number Guessing Game
 
-A terminal-based number guessing game written in Python. Pick a difficulty, guess a number between 1 and 100, and get hot/cold feedback until you solve it or run out of attempts. Results are persisted across sessions with a running stats table.
+A terminal-based number guessing game written in Python. Pick a difficulty, guess a number between 1 and 100, and get high/low feedback until you solve it or run out of attempts. Results are persisted across sessions with a running stats table.
 
 ## Screenshot
 
